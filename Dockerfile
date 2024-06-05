@@ -1,6 +1,6 @@
 ###############  builder stage ###################
 
-FROM golang:1.18.3-alpine3.15 as builder
+FROM golang:1.21.11-alpine3.20 as builder
 
 WORKDIR /build/
 
@@ -13,7 +13,7 @@ RUN go build -o /jwks-server cmd/main.go
 
 ################ final stage #########################
 
-FROM alpine:latest
+FROM alpine:3.20
 
 COPY --from=builder /jwks-server /usr/local/bin/
 
