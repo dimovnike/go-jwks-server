@@ -9,12 +9,12 @@ RUN go mod download
 
 # add the rest of the code and build the app
 ADD . ./
-RUN go build -o /jwks-server cmd/main.go
+RUN go build -o /go-jwks-server cmd/main.go
 
 ################ final stage #########################
 
 FROM alpine:3.20
 
-COPY --from=builder /jwks-server /usr/local/bin/
+COPY --from=builder /go-jwks-server /usr/local/bin/
 
-CMD ["/usr/local/bin/jwks-server"]
+CMD ["/usr/local/bin/go-jwks-server"]

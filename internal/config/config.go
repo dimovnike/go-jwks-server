@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const envVarPrefix = "JWKS_SERVER_"
+const envVarPrefix = "GO_JWKS_SERVER_"
 
 //go:embed usage.tpl
 var usageTemplate string
