@@ -33,7 +33,7 @@ func Handler(kl *keyloader.Keyloader, config Config) http.Handler {
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if code, ok := httpValidateRequest(r); !ok {
+		if code, ok := httpValidateRequest(r, config.KeysEndpoint); !ok {
 			errText := http.StatusText(code)
 			logger.Error().Err(errors.New(errText)).Int("code", code).Msg("failed to validate request")
 			http.Error(w, `"`+errText+`"`, code) // text in JSON format
@@ -95,14 +95,16 @@ func getKeysJsonCached(kl *keyloader.Keyloader) func(time.Time) ([]byte, bool, e
 	}
 }
 
-func httpValidateRequest(r *http.Request) (int, bool) {
+func httpValidateRequest(r *http.Request, endpoint string) (int, bool) {
 	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, false
 	}
 
-	if r.URL.Path != "/keys" {
+	if r.URL.Path != endpoint {
 		return http.StatusNotFound, false
 	}
+
+	// parse the Path
 
 	return 0, true
 }

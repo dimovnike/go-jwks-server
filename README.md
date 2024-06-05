@@ -95,7 +95,7 @@ curl -s localhost:8080/keys | jq
 We can see the public key with the ID `key1` is now present in the JWKS.
 
 
-## Command line usage
+## Command line flags
 
 ```text
 Flags can be provided via environment variables by prefixing the flag name with GO_JWKS_SERVER_, replacing dashes with underscore and converting it to uppercase. Example: flag -dir-watch-interval can be provided via environment variable GO_JWKS_SERVER_DIR_WATCH_INTERVAL.
@@ -116,6 +116,8 @@ Supported flags:
         set max-age in the cache-control header in seconds, set to 0 to disable caching (default 1h0m0s)
   -http-idle-timeout duration
         the maximum amount of time to wait for the next request when keep-alives are enabled
+  -http-keys-endpoint string
+        the endpoint to serve the keys (default "/keys")
   -http-max-header-bytes int
         the maximum number of bytes the server will read parsing the request headers, including the request line (default 1048576)
   -http-read-header-timeout duration
@@ -144,4 +146,5 @@ Supported flags:
         show timestamp (default true)
   -print-config
         print the configuration and exit
+
 ```

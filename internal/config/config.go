@@ -133,6 +133,9 @@ func New() (Config, error) {
 
 	// httphandler config
 
+	flag.StringVar(&config.Httphandler.KeysEndpoint, "http-keys-endpoint", config.Httphandler.KeysEndpoint,
+		"the endpoint to serve the keys")
+
 	flag.DurationVar(&config.Httphandler.CacheMaxAge, "http-cache-max-age", config.Httphandler.CacheMaxAge,
 		"set max-age in the cache-control header in seconds, set to 0 to disable caching")
 
