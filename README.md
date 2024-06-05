@@ -1,4 +1,4 @@
-Server for JSON Web Key (JWKS) sets.
+Server for JSON Web Key sets (JWKS).
 
 Designed to play nicely with kubernetes and other orchestration systems (like docker swarm).
 
