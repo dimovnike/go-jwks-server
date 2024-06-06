@@ -69,6 +69,7 @@ func loadKeys(dir string) (jwk.Set, error) {
 		}
 
 		key.Set(jwk.KeyIDKey, keyId)
+		key.Set(jwk.KeyUsageKey, jwk.ForSignature)
 
 		added := keySet.Add(key)
 
