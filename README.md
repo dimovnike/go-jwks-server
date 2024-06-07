@@ -95,6 +95,18 @@ curl -s localhost:8080/keys | jq
 We can see the public key with the ID `key1` is now present in the JWKS.
 
 
+## Install using helm
+
+This service has a helm chart, you can install it using the following commands:
+
+```sh
+helm install go-jwks-server1 https://github.com/dimovnike/go-jwks-server-helm-chart/archive/refs/tags/v0.1.0.tar.gz
+
+# or use https://github.com/dimovnike/go-jwks-server-helm-chart/archive/refs/heads/master.tar.gz for the latest version
+```
+
+For more information see the values.yaml of the chart.
+
 ## Command line flags
 
 ```text
