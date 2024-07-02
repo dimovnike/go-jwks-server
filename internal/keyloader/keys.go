@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"go-jwks-server/internal/keyfiles"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -37,7 +37,7 @@ func LoadPublicKey(key []byte) (jwk.Key, error) {
 }
 
 func LoadPublicKeyFromFile(file string) (jwk.Key, error) {
-	pubBuf, err := ioutil.ReadFile(file)
+	pubBuf, err := os.ReadFile(file)
 	if err != nil {
 		return nil, fmt.Errorf("reading public key file: %w", err)
 	}
