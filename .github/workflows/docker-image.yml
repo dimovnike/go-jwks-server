@@ -18,6 +18,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Get the dependencies
+      run: go mod download
+      
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build
+      run: go build -v -o go-jwks-server cmd/main.go
+
     - name: Build image
       run: |
         docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
