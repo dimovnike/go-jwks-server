@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/rs/zerolog"
 )
 
 type Server struct {
 	config             Config
 	server             *http.Server
+	tls                bool
 	listenAndServeFunc func() error
+	log                zerolog.Logger
 }
 
 func New(ctx context.Context, config Config, handler http.Handler) (*Server, error) {
@@ -39,6 +43,10 @@ func New(ctx context.Context, config Config, handler http.Handler) (*Server, err
 	return srv, nil
 }
 
+func (s *Server) SetLogger(logger zerolog.Logger) {
+	s.log = logger.With().Bool("https", s.tls).Logger()
+}
+
 func (s *Server) ListenAndServeWithCtx(ctx context.Context) error {
 	wg := sync.WaitGroup{}
 
@@ -57,15 +65,17 @@ func (s *Server) ListenAndServeWithCtx(ctx context.Context) error {
 		}
 
 		cancel()
-		log.Debug().Err(err).Msg("HTTP server goroutine exited")
+		s.log.Debug().Err(err).Msg("HTTP server goroutine exited")
 	}()
 
-	log.Info().Msg("HTTP server started")
-	defer log.Info().Msg("HTTP server stopped")
+	logger := s.log.With().Str("listen", s.config.Addr).Logger()
+
+	logger.Info().Msg("HTTP server started")
+	defer logger.Info().Msg("HTTP server stopped")
 
 	<-ctx.Done()
 
-	log.Info().Msg("HTTP server stopping ...")
+	logger.Info().Msg("HTTP server stopping ...")
 
 	shutdownCtx, shutdownCtxCancel := context.WithTimeout(context.Background(), s.config.ShutdownTimeout)
 	defer shutdownCtxCancel()

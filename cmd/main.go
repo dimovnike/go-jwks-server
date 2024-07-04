@@ -42,7 +42,6 @@ func main() {
 
 	keyfiles.SetLogger(log)
 	keyloader.SetLogger(log)
-	httpsrv.SetLogger(log)
 	httphandler.SetLogger(log)
 
 	ctx, cancel := shutdownContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -74,6 +73,8 @@ func main() {
 			log.Fatal().Err(err).Msg("failed to create http server")
 			return
 		}
+
+		srv.SetLogger(log)
 	}
 
 	if config.EnableHTTPS {
@@ -83,6 +84,8 @@ func main() {
 			log.Fatal().Err(err).Msg("failed to create https server")
 			return
 		}
+
+		srvTls.SetLogger(log)
 	}
 
 	if !config.EnableHTTP && !config.EnableHTTPS {

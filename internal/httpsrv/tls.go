@@ -13,6 +13,7 @@ func NewTLS(ctx context.Context, config ConfigTLS, handler http.Handler) (*Serve
 
 	srv := &Server{
 		config: config.Config,
+		tls:    true,
 		server: &http.Server{
 			Addr:              config.Addr,
 			ReadTimeout:       config.ReadTimeout,
