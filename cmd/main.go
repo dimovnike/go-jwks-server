@@ -54,12 +54,6 @@ func main() {
 		return
 	}
 
-	srv, err := httpsrv.New(ctx, config.Httpsrv, httphandler.Handler(kl, config.Httphandler))
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create http srv")
-		return
-	}
-
 	if !config.Keyloader.WatchOn() {
 		if err := kl.LoadKeys(); err != nil {
 			log.Fatal().Err(err).Msg("failed to load keys")
@@ -69,13 +63,51 @@ func main() {
 
 	eg, ctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error {
-		if err := srv.ListenAndServeWithCtx(ctx); err != nil {
-			return fmt.Errorf("http server: %w", err)
-		}
+	var srv, srvTls *httpsrv.Server
 
-		return nil
-	})
+	keyHttpHandler := httphandler.Handler(kl, config.Httphandler)
+
+	if config.EnableHTTP {
+		var err error
+		srv, err = httpsrv.New(ctx, config.Httpsrv, keyHttpHandler)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to create http server")
+			return
+		}
+	}
+
+	if config.EnableHTTPS {
+		var err error
+		srvTls, err = httpsrv.NewTLS(ctx, config.HttpTlsServ, keyHttpHandler)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to create https server")
+			return
+		}
+	}
+
+	if !config.EnableHTTP && !config.EnableHTTPS {
+		log.Warn().Msg("no server is enabled to serve the keys")
+	}
+
+	if config.EnableHTTP {
+		eg.Go(func() error {
+			if err := srv.ListenAndServeWithCtx(ctx); err != nil {
+				return fmt.Errorf("http server: %w", err)
+			}
+
+			return nil
+		})
+	}
+
+	if config.EnableHTTPS {
+		eg.Go(func() error {
+			if err := srvTls.ListenAndServeWithCtx(ctx); err != nil {
+				return fmt.Errorf("https server: %w", err)
+			}
+
+			return nil
+		})
+	}
 
 	if config.Keyloader.WatchOn() {
 		eg.Go(func() error {

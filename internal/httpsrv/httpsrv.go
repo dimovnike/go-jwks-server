@@ -9,8 +9,9 @@ import (
 )
 
 type Server struct {
-	config Config
-	server *http.Server
+	config             Config
+	server             *http.Server
+	listenAndServeFunc func() error
 }
 
 func New(ctx context.Context, config Config, handler http.Handler) (*Server, error) {
@@ -18,18 +19,21 @@ func New(ctx context.Context, config Config, handler http.Handler) (*Server, err
 		return nil, fmt.Errorf("config validation: %w", err)
 	}
 
-	srv := &Server{
-		config: config,
-		server: &http.Server{
-			Addr:              config.Addr,
-			ReadTimeout:       config.ReadTimeout,
-			ReadHeaderTimeout: config.ReadHeaderTimeout,
-			WriteTimeout:      config.WriteTimeout,
-			IdleTimeout:       config.IdleTimeout,
-			MaxHeaderBytes:    config.MaxHeaderBytes,
+	httpSrv := &http.Server{
+		Addr:              config.Addr,
+		ReadTimeout:       config.ReadTimeout,
+		ReadHeaderTimeout: config.ReadHeaderTimeout,
+		WriteTimeout:      config.WriteTimeout,
+		IdleTimeout:       config.IdleTimeout,
+		MaxHeaderBytes:    config.MaxHeaderBytes,
 
-			Handler: handler,
-		},
+		Handler: handler,
+	}
+
+	srv := &Server{
+		config:             config,
+		server:             httpSrv,
+		listenAndServeFunc: httpSrv.ListenAndServe,
 	}
 
 	return srv, nil
@@ -47,7 +51,7 @@ func (s *Server) ListenAndServeWithCtx(ctx context.Context) error {
 	go func() {
 		defer wg.Done()
 
-		err := s.server.ListenAndServe()
+		err := s.listenAndServeFunc()
 		if !errors.Is(err, http.ErrServerClosed) {
 			serveErr = err
 		}
