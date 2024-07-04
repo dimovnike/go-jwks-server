@@ -23,9 +23,12 @@ type Config struct {
 	Logger      logger.Config
 	Keyloader   keyloader.Config
 	Httpsrv     httpsrv.Config
+	HttpTlsServ httpsrv.ConfigTLS
 	Httphandler httphandler.Config
 
 	PrintConfig bool
+	EnableHTTP  bool
+	EnableHTTPS bool
 }
 
 func (c Config) String() string {
@@ -42,7 +45,10 @@ func New() (Config, error) {
 		Logger:      logger.NewConfig(),
 		Keyloader:   keyloader.NewConfig(),
 		Httpsrv:     httpsrv.NewConfig(),
+		HttpTlsServ: httpsrv.NewConfigTLS(),
 		Httphandler: httphandler.NewConfig(),
+
+		EnableHTTP: true,
 	}
 
 	flag.Usage = func() {
@@ -110,6 +116,9 @@ func New() (Config, error) {
 
 	// http config
 
+	flag.BoolVar(&config.EnableHTTP, "http-enable", config.EnableHTTP,
+		"enable plain http server")
+
 	flag.StringVar(&config.Httpsrv.Addr, "http-addr", config.Httpsrv.Addr,
 		"the address to listen on")
 
@@ -130,6 +139,38 @@ func New() (Config, error) {
 
 	flag.IntVar(&config.Httpsrv.MaxHeaderBytes, "http-max-header-bytes", config.Httpsrv.MaxHeaderBytes,
 		"the maximum number of bytes the server will read parsing the request headers, including the request line")
+
+	// http TLS config
+
+	flag.BoolVar(&config.EnableHTTPS, "https-enable", config.EnableHTTPS,
+		"enable https/TLS server")
+
+	flag.StringVar(&config.HttpTlsServ.Addr, "https-addr", config.HttpTlsServ.Addr,
+		"the address to listen on")
+
+	flag.DurationVar(&config.HttpTlsServ.ReadTimeout, "https-read-timeout", config.HttpTlsServ.ReadTimeout,
+		"timeout for reading the entire request, including the body")
+
+	flag.DurationVar(&config.HttpTlsServ.ReadHeaderTimeout, "https-read-header-timeout", config.HttpTlsServ.ReadHeaderTimeout,
+		"timeout for reading the request headers")
+
+	flag.DurationVar(&config.HttpTlsServ.WriteTimeout, "https-write-timeout", config.HttpTlsServ.WriteTimeout,
+		"timeout for writing the response")
+
+	flag.DurationVar(&config.HttpTlsServ.IdleTimeout, "https-idle-timeout", config.HttpTlsServ.IdleTimeout,
+		"the maximum amount of time to wait for the next request when keep-alives are enabled")
+
+	flag.DurationVar(&config.HttpTlsServ.ShutdownTimeout, "https-shutdown-timeout", config.HttpTlsServ.ShutdownTimeout,
+		"timeout for graceful shutdown of the server")
+
+	flag.IntVar(&config.HttpTlsServ.MaxHeaderBytes, "https-max-header-bytes", config.HttpTlsServ.MaxHeaderBytes,
+		"the maximum number of bytes the server will read parsing the request headers, including the request line")
+
+	flag.StringVar(&config.HttpTlsServ.CertFile, "https-cert-file", config.HttpTlsServ.CertFile,
+		"TLS cert file")
+
+	flag.StringVar(&config.HttpTlsServ.KeyFile, "https-key-file", config.HttpTlsServ.KeyFile,
+		"TLS key file")
 
 	// httphandler config
 

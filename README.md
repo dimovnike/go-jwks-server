@@ -8,6 +8,7 @@ Designed to play nicely with kubernetes and other orchestration systems (like do
 - Can watch the directory for changes and reload the keys (useful with kubernetes secrets).
 - Sets cache control headers according to the config.
 - Can be configured using command line flags and environment variables.
+- TLS support.
 - Configurable logging using zerolog.
 
 ## Example usage:
@@ -126,6 +127,8 @@ Supported flags:
         the address to listen on (default ":8080")
   -http-cache-max-age duration
         set max-age in the cache-control header in seconds, set to 0 to disable caching (default 1h0m0s)
+  -http-enable
+        enable plain http server (default true)
   -http-idle-timeout duration
         the maximum amount of time to wait for the next request when keep-alives are enabled
   -http-keys-endpoint string
@@ -139,6 +142,26 @@ Supported flags:
   -http-shutdown-timeout duration
         timeout for graceful shutdown of the server (default 5s)
   -http-write-timeout duration
+        timeout for writing the response
+  -https-addr string
+        the address to listen on (default ":8443")
+  -https-cert-file string
+        TLS cert file
+  -https-enable
+        enable https/TLS server
+  -https-idle-timeout duration
+        the maximum amount of time to wait for the next request when keep-alives are enabled
+  -https-key-file string
+        TLS key file
+  -https-max-header-bytes int
+        the maximum number of bytes the server will read parsing the request headers, including the request line (default 1048576)
+  -https-read-header-timeout duration
+        timeout for reading the request headers
+  -https-read-timeout duration
+        timeout for reading the entire request, including the body
+  -https-shutdown-timeout duration
+        timeout for graceful shutdown of the server (default 5s)
+  -https-write-timeout duration
         timeout for writing the response
   -key-dir string
         the directory to load the keys from (default "./keys")

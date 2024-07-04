@@ -6,11 +6,16 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/rs/zerolog"
 )
 
 type Server struct {
-	config Config
-	server *http.Server
+	config             Config
+	server             *http.Server
+	tls                bool
+	listenAndServeFunc func() error
+	log                zerolog.Logger
 }
 
 func New(ctx context.Context, config Config, handler http.Handler) (*Server, error) {
@@ -18,21 +23,28 @@ func New(ctx context.Context, config Config, handler http.Handler) (*Server, err
 		return nil, fmt.Errorf("config validation: %w", err)
 	}
 
-	srv := &Server{
-		config: config,
-		server: &http.Server{
-			Addr:              config.Addr,
-			ReadTimeout:       config.ReadTimeout,
-			ReadHeaderTimeout: config.ReadHeaderTimeout,
-			WriteTimeout:      config.WriteTimeout,
-			IdleTimeout:       config.IdleTimeout,
-			MaxHeaderBytes:    config.MaxHeaderBytes,
+	httpSrv := &http.Server{
+		Addr:              config.Addr,
+		ReadTimeout:       config.ReadTimeout,
+		ReadHeaderTimeout: config.ReadHeaderTimeout,
+		WriteTimeout:      config.WriteTimeout,
+		IdleTimeout:       config.IdleTimeout,
+		MaxHeaderBytes:    config.MaxHeaderBytes,
 
-			Handler: handler,
-		},
+		Handler: handler,
+	}
+
+	srv := &Server{
+		config:             config,
+		server:             httpSrv,
+		listenAndServeFunc: httpSrv.ListenAndServe,
 	}
 
 	return srv, nil
+}
+
+func (s *Server) SetLogger(logger zerolog.Logger) {
+	s.log = logger.With().Bool("https", s.tls).Logger()
 }
 
 func (s *Server) ListenAndServeWithCtx(ctx context.Context) error {
@@ -47,21 +59,23 @@ func (s *Server) ListenAndServeWithCtx(ctx context.Context) error {
 	go func() {
 		defer wg.Done()
 
-		err := s.server.ListenAndServe()
+		err := s.listenAndServeFunc()
 		if !errors.Is(err, http.ErrServerClosed) {
 			serveErr = err
 		}
 
 		cancel()
-		log.Debug().Err(err).Msg("HTTP server goroutine exited")
+		s.log.Debug().Err(err).Msg("HTTP server goroutine exited")
 	}()
 
-	log.Info().Msg("HTTP server started")
-	defer log.Info().Msg("HTTP server stopped")
+	logger := s.log.With().Str("listen", s.config.Addr).Logger()
+
+	logger.Info().Msg("HTTP server started")
+	defer logger.Info().Msg("HTTP server stopped")
 
 	<-ctx.Done()
 
-	log.Info().Msg("HTTP server stopping ...")
+	logger.Info().Msg("HTTP server stopping ...")
 
 	shutdownCtx, shutdownCtxCancel := context.WithTimeout(context.Background(), s.config.ShutdownTimeout)
 	defer shutdownCtxCancel()
