@@ -57,10 +57,10 @@ curl -s localhost:8080/keys | jq
 
 Create the secret with the public keys:
 
-```bash
+```sh
 # generate a key pair
+openssl ecparam -name prime256v1 -genkey -noout -out priv-key.pem
 openssl ec -in priv-key.pem -pubout > pub-key.pem
-openssl ec -pubin -in pub-key.pem -text
 
 # create and apply the secret
 kubectl create secret generic jwks-public-keys --from-file=key1=pub-key.pem  --dry-run=client --save-config --dry-run=client -oyaml \
