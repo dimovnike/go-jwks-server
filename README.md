@@ -1,4 +1,7 @@
 Server for JSON Web Key sets (JWKS).
+====================================
+[![Action Marketplace][release-badge]][releases]
+[![Build Status][build-badge]][ci]
 
 Designed to play nicely with kubernetes and other orchestration systems (like docker swarm).
 
@@ -183,3 +186,9 @@ Supported flags:
         print the configuration and exit
 
 ```
+
+
+[build-badge]: https://github.com/dimovnike/go-jwks-server/actions/workflows/docker-image.yml/badge.svg
+[releases]: https://github.com/dimovnike/go-jwks-server/releases
+[release-badge]: https://img.shields.io/github/v/release/dimovnike/go-jwks-server.svg
+[ci]: https://github.com/dimovnike/go-jwks-server/actions?query=workflow%3ACI
