@@ -28,7 +28,7 @@ metadata:
 spec:
   containers:
     - name: go-jwks-server
-      image: ghcr.io/dimovnike/go-jwks-server:latest
+      image: dimovnike/go-jwks-server:latest
       ports:
         - containerPort: 8080
       volumeMounts:
